@@ -13,13 +13,45 @@ from pycipher import Vigenere
 
 KEY_LENGTH = 14
 
-POPULATION_SIZE = 100
+POPULATION_SIZE = 80
 CROSSOVER_PROBABILITY = 0.9
 MUTATION_PROBABILITY = 0.75
 MAX_GENERATIONS = 30
 
-# encrypted message with spaces and non-alphabetic characters (e.g. punctuation) removed
-ciphertext = "HLAJMVPLUZAAZVLVAZWMWEKLQRPRXQCTVHHCGHEQRQVTCIXBRUDSPSGKWRQDIGPIFUDSDLUENJCLIEEKEBKHJQUFJMWEHJEBTLHPGJTKPCLAYSJDFHEFRVTPLKKTGKQWKTWLJCZSOAFWASPVRXGGQXKFTHLMOVXATREGZMEDEMEJUNPNLMIQYHEMUKVRHTSLEGKLUENDIVWAFAYGRQSPAKMVPLVQJODLUWCEHVWEEAYOCHIYKCMUGIS"
+# encrypted message
+ciphertext = 'Hlajmvpl Uzaazvlva zw mwe klqrp rx qctvhhcgheq, rqv tcixbrudsps gkwrqdigp if udsdluen jclieek eb khjqu fj mwe hjebtlhpgj, tkpclaysj, dfh efrvtplk kt gkqwktw ljcz so afwasp, vrxggq, xkfth, lmov, xatregzmedemej, unpnlmi qyhemukvr, htslegkluen divwafayg, rqspakmvpl vqjodluw ceh vweeayoc hiykcmugis.'
+
+
+def format_ciphertext(the_ciphertext):
+    """
+    Return the formatted ciphertext.
+    Formatted refers to conversion to uppercase letters and the removal of
+    spaces and non-alphabetic characters (e.g. punctuation)
+    """
+    formatted_cipher_text = ''
+    for c in the_ciphertext:
+        if c.isalpha():
+            formatted_cipher_text += c.upper()
+    return formatted_cipher_text
+
+
+def restore_original_format(original_format, modified_format):
+    """
+    Return the original ciphertext format with casing, spaces, and
+    punctuation restored.
+    """
+    restored_text = ''
+    i = 0
+    for c in original_format:
+        if c.isalpha():
+            if c.isupper():
+                restored_text += modified_format[i].upper()
+            elif c.islower():
+                restored_text += modified_format[i].lower()
+            i += 1
+        else:
+            restored_text += c
+    return restored_text
 
 
 def generate_random_letter():
@@ -44,7 +76,7 @@ toolbox.register("populationCreator", tools.initRepeat, list, toolbox.individual
 def fitness_function(key):
     """Return a tuple of the numeric score given to a message decrypted with a key"""
     fitness = ns.ngram_score('quadgrams.txt')
-    plaintext = Vigenere(key).decipher(ciphertext)
+    plaintext = Vigenere(key).decipher(format_ciphertext(ciphertext))
     return (fitness.score(plaintext)),
 
 
@@ -76,7 +108,7 @@ def main():
     population = toolbox.populationCreator(n=POPULATION_SIZE)
     generation = 0
     # create hall of fame, which retains the best n individuals as specified
-    hof = tools.HallOfFame(10)
+    hof = tools.HallOfFame(8)
     hof_size = len(hof.items)
     # calculate fitness for each individual in the population
     fitness_values = list(map(toolbox.evaluate, population))
@@ -123,7 +155,8 @@ def main():
         print(f'Generation: {generation} Max Fitness = {max_fitness}, Avg Fitness = {mean_fitness}')
         # print best individual:
         best_index = fitness_values.index(max(fitness_values))
-        print("Best Individual = ", *population[best_index], "\n")
+        print("Best Individual =", *population[best_index])
+        print(f'Decrypted message: {restore_original_format(ciphertext, Vigenere("".join(list(population[best_index]))).decipher(format_ciphertext(ciphertext)))} \n')
 
     # plot statistics
     sns.set_style("whitegrid")
