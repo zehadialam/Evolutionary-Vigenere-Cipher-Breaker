@@ -13,13 +13,20 @@ from pycipher import Vigenere
 
 KEY_LENGTH = 14
 
-POPULATION_SIZE = 80
-CROSSOVER_PROBABILITY = 0.9
-MUTATION_PROBABILITY = 0.75
-MAX_GENERATIONS = 30
+POPULATION_SIZE = 75
+CROSSOVER_PROBABILITY = 1
+MUTATION_PROBABILITY = 1
+MAX_GENERATIONS = 35
 
-# encrypted message
-ciphertext = 'Hlajmvpl Uzaazvlva zw mwe klqrp rx qctvhhcgheq, rqv tcixbrudsps gkwrqdigp if udsdluen jclieek eb khjqu fj mwe hjebtlhpgj, tkpclaysj, dfh efrvtplk kt gkqwktw ljcz so afwasp, vrxggq, xkfth, lmov, xatregzmedemej, unpnlmi qyhemukvr, htslegkluen divwafayg, rqspakmvpl vqjodluw ceh vweeayoc hiykcmugis.'
+plaintext = 'Physical Chemistry is the study of macroscopic, and particulate phenomena in chemical systems in terms of the principles, practices, and concepts of physics such as motion, energy, force, time, thermodynamics, quantum chemistry, statistical mechanics, analytical dynamics and chemical equilibria.'
+
+
+def generate_random_letter():
+    """Return random uppercase letter from the English alphabet"""
+    return secrets.choice(string.ascii_uppercase)
+
+
+encryption_key = "".join([generate_random_letter() for _ in range(KEY_LENGTH)])
 
 
 def format_ciphertext(the_ciphertext):
@@ -54,9 +61,8 @@ def restore_original_format(original_format, modified_format):
     return restored_text
 
 
-def generate_random_letter():
-    """Return random uppercase letter from the English alphabet"""
-    return secrets.choice(string.ascii_uppercase)
+# encrypted message
+ciphertext = restore_original_format(plaintext, Vigenere(encryption_key).encipher(plaintext))
 
 
 # using DEAP's Toolbox class to create genetic algorithm components
@@ -76,8 +82,8 @@ toolbox.register("populationCreator", tools.initRepeat, list, toolbox.individual
 def fitness_function(key):
     """Return a tuple of the numeric score given to a message decrypted with a key"""
     fitness = ns.ngram_score('quadgrams.txt')
-    plaintext = Vigenere(key).decipher(format_ciphertext(ciphertext))
-    return (fitness.score(plaintext)),
+    decrypted = Vigenere(key).decipher(format_ciphertext(ciphertext))
+    return (fitness.score(decrypted)),
 
 
 # register fitness function with the toolbox
@@ -96,7 +102,7 @@ def mut_random_reset(individual, indpb):
 # register selection operator with the toolbox
 toolbox.register("select", tools.selTournament, tournsize=3)
 # register crossover operator with the toolbox
-toolbox.register("mate", tools.cxUniform, indpb=1.0 / KEY_LENGTH)
+toolbox.register("mate", tools.cxUniform, indpb=0.7)
 # register mutation operator with the toolbox
 toolbox.register("mutate", mut_random_reset, indpb=1.0 / KEY_LENGTH)
 
@@ -108,7 +114,7 @@ def main():
     population = toolbox.populationCreator(n=POPULATION_SIZE)
     generation = 0
     # create hall of fame, which retains the best n individuals as specified
-    hof = tools.HallOfFame(8)
+    hof = tools.HallOfFame(10)
     hof_size = len(hof.items)
     # calculate fitness for each individual in the population
     fitness_values = list(map(toolbox.evaluate, population))
@@ -121,7 +127,7 @@ def main():
     while generation < MAX_GENERATIONS:
         generation += 1
         # selects the individuals for the next generation (excluding elite individuals)
-        offspring = toolbox.select(population, len(population) - hof_size)
+        offspring = toolbox.select(population, len(population))
         # selected individuals become offspring
         offspring = list(map(toolbox.clone, offspring))
         # crossover pairs of offspring
@@ -130,7 +136,7 @@ def main():
                 toolbox.mate(child1, child2)
                 del child1.fitness.values
                 del child2.fitness.values
-        # mutate offspring (with elite individuals excluded)
+        # mutate offspring
         for mutant in offspring:
             if random.random() < MUTATION_PROBABILITY:
                 toolbox.mutate(mutant)
@@ -140,11 +146,13 @@ def main():
         new_fitness_values = list(map(toolbox.evaluate, new_individuals))
         for individual, fitness_value in zip(new_individuals, new_fitness_values):
             individual.fitness.values = fitness_value
-        # add the best n individuals back into the population (to implement elitism)
-        offspring.extend(hof.items)
+        # sort offspring by fitness values
+        offspring = sorted(offspring, key=lambda x: x.fitness.values[0])
+        # replace worst n offspring with the best n saved individuals (to implement elitism)
+        offspring[:hof_size] = hof.items
         # Update the hall of fame with new best individuals
         hof.update(offspring)
-        # replace current population offspring:
+        # replace current population with offspring:
         population[:] = offspring
         # gather and print fitness statistics for each generation
         fitness_values = [ind.fitness.values[0] for ind in population]
@@ -156,15 +164,24 @@ def main():
         # print best individual:
         best_index = fitness_values.index(max(fitness_values))
         print("Best Individual =", *population[best_index])
-        print(f'Decrypted message: {restore_original_format(ciphertext, Vigenere("".join(list(population[best_index]))).decipher(format_ciphertext(ciphertext)))} \n')
+        print(
+            f'Decrypted message: {restore_original_format(ciphertext, Vigenere("".join(list(population[best_index]))).decipher(format_ciphertext(ciphertext)))} \n')
+        if generation == MAX_GENERATIONS:
+            print(f'The encryption key is {encryption_key}')
+            if "".join(population[best_index]) == encryption_key:
+                print('The key was successfully cracked!')
+            else:
+                print('The key was not successfully cracked')
 
     # plot statistics
     sns.set_style("whitegrid")
-    plt.plot(max_fitness_values, color='red')
-    plt.plot(mean_fitness_values, color='green')
+    fig, ax = plt.subplots()
+    plt.plot(max_fitness_values, color='red', label='Max fitness')
+    plt.plot(mean_fitness_values, color='green', label='Mean fitness')
+    ax.legend()
     plt.xlabel('Generation')
-    plt.ylabel('Max / Average Fitness')
-    plt.title('Max and Average Fitness over Generations')
+    plt.ylabel('Max / Mean Fitness')
+    plt.title('Max and Mean Fitness over Generations')
     plt.show()
 
 
