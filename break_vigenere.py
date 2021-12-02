@@ -11,12 +11,12 @@ from deap import tools
 
 from pycipher import Vigenere
 
-KEY_LENGTH = 14
+KEY_LENGTH = 16
 
 POPULATION_SIZE = 75
 CROSSOVER_PROBABILITY = 1
 MUTATION_PROBABILITY = 1
-MAX_GENERATIONS = 35
+MAX_GENERATIONS = 10000
 
 plaintext = 'Physical Chemistry is the study of macroscopic, and particulate phenomena in chemical systems in terms of the principles, practices, and concepts of physics such as motion, energy, force, time, thermodynamics, quantum chemistry, statistical mechanics, analytical dynamics and chemical equilibria.'
 
@@ -112,7 +112,7 @@ def terminate(max_fitness_values):
             # Ask the human in the loop to read the message
             print("Is the individual fully decrypted? Y or N?")
             user_input = input()
-            if user_input == "Y":
+            if user_input == "Y".lower():
                 return True
     return False
 
