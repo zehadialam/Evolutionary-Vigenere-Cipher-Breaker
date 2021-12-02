@@ -98,6 +98,23 @@ def mut_random_reset(individual, indpb):
             individual[i] = generate_random_letter()
     return individual,
 
+# return true if the past 6 max fitnesses exist and are equal. 
+def terminate(max_fitness_values):
+    N = 6
+    # If there have been less than N generations then return false. 
+    if len(max_fitness_values) < N:
+        return False
+    else:
+        # Retrieve the most recent N values of max_fitness_values
+        last_N_elements = max_fitness_values[-N:]
+        # If statement to see if they are all equal
+        if all(x==last_N_elements[0] for x in last_N_elements):
+            # Ask the human in the loop to read the message
+            print("Is the individual fully decrypted? Y or N?")
+            user_input = input()
+            if user_input == "Y":
+                return True
+    return False
 
 # register selection operator with the toolbox
 toolbox.register("select", tools.selTournament, tournsize=3)
@@ -126,6 +143,11 @@ def main():
     # run genetic algorithm for specified generations
     while generation < MAX_GENERATIONS:
         generation += 1
+          
+        # If the terminate method returns true then break out of the loop and end the GA.
+        if terminate(max_fitness_values):
+            break
+        
         # selects the individuals for the next generation (excluding elite individuals)
         offspring = toolbox.select(population, len(population))
         # selected individuals become offspring
