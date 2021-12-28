@@ -8,9 +8,9 @@ Genetic algorithms are a kind of search algorithm that seek to find solutions fr
 Problems that are to be solved using a genetic algorithm must undergo the proper set up and formulation. In this project, the following constitutes the problem formulation:
 
 <b><ins>Representation:</ins></b> Chromosomes consist of genes that are ASCII values 65 – 90 (i.e., uppercase characters of English alphabet).<br><br>
-<ins>Initialization:</ins> Randomly generate population of 75 individuals.<br>
-<ins>Fitness Function:</ins> The sum of the log probabilities of all quadgrams within a message decrypted with a candidate key.<br>
-<ins>Mutation:</ins> Random resetting (i.e., character at random chromosomal position is replaced with a different character) with a probability of 1 / key length.<br>
-<ins>Crossover:</ins> Uniform crossover with a probability of 0.7<br>
-<ins>Selection:</ins> Ternary tournament selection<br>
-<ins>Termination condition:</ins> Message is fully decrypted.<br>
+<b><ins>Initialization:</ins></b> Randomly generate population of 75 individuals.<br><br>
+<b><ins>Fitness Function:</ins></b> The sum of the log probabilities of all quadgrams within a message decrypted with a candidate key.<br><br>
+<b><ins>Mutation:</ins></b> Random resetting (i.e., character at random chromosomal position is replaced with a different character) with a probability of 1 / key length.<br><br>
+<b><ins>Crossover:</ins></b> Uniform crossover with a probability of 0.7<br><br>
+<b><ins>Selection:</ins></b> Ternary tournament selection<br><br>
+<b><ins>Termination condition:</ins></b> Message is fully decrypted.<br>
