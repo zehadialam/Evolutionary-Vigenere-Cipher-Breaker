@@ -14,11 +14,3 @@ Problems that are to be solved using a genetic algorithm must undergo the proper
 <b><ins>Crossover:</ins></b> Uniform crossover with a probability of 0.7<br><br>
 <b><ins>Selection:</ins></b> Ternary tournament selection<br><br>
 <b><ins>Termination condition:</ins></b> Message is fully decrypted.<br>
-
-## The Fitness Function
-
-A core component of evolutionary algorithms is the fitness or objective function. This constitutes the target that is to be optimized throughout the execution of the program. Optimization can refer to either the maximization or the minimization of the fitness value that is the output of the fitness function. Whichever optimization criterion is used serves as the basis for determining the quality of the solutions produced (i.e., the fitness of the individuals). In our program, the fitness function $\F$ is defined as follows:
-
-Let Q be the multiset of all quadgrams q_1…q_n within a string.
-
-<img src="https://render.githubusercontent.com/render/math?math=e^{i \pi} = -1">
