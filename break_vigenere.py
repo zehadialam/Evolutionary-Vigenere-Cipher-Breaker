@@ -14,8 +14,6 @@ from pycipher import Vigenere
 KEY_LENGTH = 16
 
 POPULATION_SIZE = 75
-CROSSOVER_PROBABILITY = 1
-MUTATION_PROBABILITY = 1
 MAX_GENERATIONS = 10000
 
 plaintext = 'Physical Chemistry is the study of macroscopic, and particulate phenomena in chemical systems in terms of the principles, practices, and concepts of physics such as motion, energy, force, time, thermodynamics, quantum chemistry, statistical mechanics, analytical dynamics and chemical equilibria.'
@@ -26,7 +24,7 @@ def generate_random_letter():
     return secrets.choice(string.ascii_uppercase)
 
 
-encryption_key = "".join([generate_random_letter() for _ in range(KEY_LENGTH)])
+ENCRYPTION_KEY = "".join([generate_random_letter() for _ in range(KEY_LENGTH)])
 
 
 def format_ciphertext(the_ciphertext):
@@ -62,8 +60,7 @@ def restore_original_format(original_format, modified_format):
 
 
 # encrypted message
-ciphertext = restore_original_format(plaintext, Vigenere(encryption_key).encipher(plaintext))
-
+CIPHERTEXT = restore_original_format(plaintext, Vigenere(ENCRYPTION_KEY).encipher(plaintext))
 
 # using DEAP's Toolbox class to create genetic algorithm components
 toolbox = base.Toolbox()
@@ -82,7 +79,7 @@ toolbox.register("populationCreator", tools.initRepeat, list, toolbox.individual
 def fitness_function(key):
     """Return a tuple of the numeric score given to a message decrypted with a key"""
     fitness = ns.ngram_score('quadgrams.txt')
-    decrypted = Vigenere(key).decipher(format_ciphertext(ciphertext))
+    decrypted = Vigenere(key).decipher(format_ciphertext(CIPHERTEXT))
     return (fitness.score(decrypted)),
 
 
@@ -98,8 +95,10 @@ def mut_random_reset(individual, indpb):
             individual[i] = generate_random_letter()
     return individual,
 
-# return true if the past 6 max fitnesses exist and are equal. 
+
+# return true if the past 6 max fitnesses exist and are equal.
 def terminate(max_fitness_values):
+    """Return True if the past six max fitnesses exist and are equal"""
     N = 6
     # If there have been less than N generations then return false. 
     if len(max_fitness_values) < N:
@@ -108,13 +107,14 @@ def terminate(max_fitness_values):
         # Retrieve the most recent N values of max_fitness_values
         last_N_elements = max_fitness_values[-N:]
         # If statement to see if they are all equal
-        if all(x==last_N_elements[0] for x in last_N_elements):
+        if all(x == last_N_elements[0] for x in last_N_elements):
             # Ask the human in the loop to read the message
             print("Is the individual fully decrypted? Y or N?")
             user_input = input()
             if user_input == "Y".lower():
                 return True
     return False
+
 
 # register selection operator with the toolbox
 toolbox.register("select", tools.selTournament, tournsize=3)
@@ -141,28 +141,21 @@ def main():
     max_fitness_values = []
     mean_fitness_values = []
     # run genetic algorithm for specified generations
-    while generation < MAX_GENERATIONS:
+    while generation < MAX_GENERATIONS and not terminate(max_fitness_values):
         generation += 1
-          
-        # If the terminate method returns true then break out of the loop and end the GA.
-        if terminate(max_fitness_values):
-            break
-        
         # selects the individuals for the next generation (excluding elite individuals)
         offspring = toolbox.select(population, len(population))
         # selected individuals become offspring
         offspring = list(map(toolbox.clone, offspring))
         # crossover pairs of offspring
         for child1, child2 in zip(offspring[::2], offspring[1::2]):
-            if random.random() < CROSSOVER_PROBABILITY:
-                toolbox.mate(child1, child2)
-                del child1.fitness.values
-                del child2.fitness.values
+            toolbox.mate(child1, child2)
+            del child1.fitness.values
+            del child2.fitness.values
         # mutate offspring
         for mutant in offspring:
-            if random.random() < MUTATION_PROBABILITY:
-                toolbox.mutate(mutant)
-                del mutant.fitness.values
+            toolbox.mutate(mutant)
+            del mutant.fitness.values
         # calculate fitness for new individuals
         new_individuals = [ind for ind in offspring if not ind.fitness.valid]
         new_fitness_values = list(map(toolbox.evaluate, new_individuals))
@@ -187,10 +180,10 @@ def main():
         best_index = fitness_values.index(max(fitness_values))
         print("Best Individual =", *population[best_index])
         print(
-            f'Decrypted message: {restore_original_format(ciphertext, Vigenere("".join(list(population[best_index]))).decipher(format_ciphertext(ciphertext)))} \n')
-        if generation == MAX_GENERATIONS:
-            print(f'The encryption key is {encryption_key}')
-            if "".join(population[best_index]) == encryption_key:
+            f'Decrypted message: {restore_original_format(CIPHERTEXT, Vigenere("".join(list(population[best_index]))).decipher(format_ciphertext(CIPHERTEXT)))} \n')
+        if generation == MAX_GENERATIONS or "".join(population[best_index]) == ENCRYPTION_KEY:
+            print(f'The encryption key is {ENCRYPTION_KEY}')
+            if "".join(population[best_index]) == ENCRYPTION_KEY:
                 print('The key was successfully cracked!')
             else:
                 print('The key was not successfully cracked')
