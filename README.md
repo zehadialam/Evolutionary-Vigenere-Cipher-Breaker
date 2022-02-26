@@ -14,3 +14,7 @@ Problems that are to be solved using a genetic algorithm must undergo the proper
 <b><ins>Crossover:</ins></b> Uniform crossover with a probability of 0.7<br><br>
 <b><ins>Selection:</ins></b> Ternary tournament selection<br><br>
 <b><ins>Termination condition:</ins></b> Message is fully decrypted.<br>
+
+## Acknowledgements
+
+I extend my gratitude and appreciation to my colleague, Karina Patel, for her suggestion of utilizing the DEAP framework and her contributions to the termination condition of the genetic algorithm.
