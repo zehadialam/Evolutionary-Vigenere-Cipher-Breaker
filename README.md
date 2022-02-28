@@ -1,5 +1,8 @@
-# Vigenère Cipher Breaker using a Genetic Algorithm
+# Evolutionary Vigenère Cipher Breaker
 
+## Description
+
+This is a program that breaks the Vigenère cipher using a genetic algorithm.
 
 ## Genetic Algorithm
 
