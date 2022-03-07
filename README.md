@@ -20,4 +20,4 @@ Problems that are to be solved using a genetic algorithm must undergo the proper
 
 ## Acknowledgements
 
-I extend my gratitude and appreciation to my colleague, <a href="https://github.com/karinapt7">Karina Patel</a>, for her suggestion to utilize the DEAP framework and her contributions to the termination condition of the genetic algorithm.
+I extend my gratitude and appreciation to my esteemed colleague, <a href="https://github.com/karinapt7">Karina Patel</a>, for her suggestion to utilize the DEAP framework and her contributions to the termination condition of the genetic algorithm.
